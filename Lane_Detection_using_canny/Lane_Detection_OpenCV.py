@@ -82,14 +82,30 @@ def visualize_lines(frame, lines):
     
     
 cap = cv2.VideoCapture("input.mp4")
+
+''' ---------------- Setup writers for all outputs ----------------
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+fps = int(cap.get(cv2.CAP_PROP_FPS))
+width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+out_canny   = cv2.VideoWriter("canny.mp4",   fourcc, fps, (width, height), isColor=False)
+out_segment = cv2.VideoWriter("segment.mp4", fourcc, fps, (width, height), isColor=False)
+out_hough   = cv2.VideoWriter("hough.mp4",   fourcc, fps, (width, height))
+out_output  = cv2.VideoWriter("output.mp4",  fourcc, fps, (width, height))
+# ----------------------------------------------------------------'''
+
+
 while (cap.isOpened()):
     # ret = a boolean return value from getting the frame, frame = the current frame being projected in the video
     ret, frame = cap.read()
     canny = perform_canny(frame)
     cv2.imshow("canny", canny)
+    # out_canny.write(canny)   # save canny result
     
     segment = perform_segment(canny)
     cv2.imshow("segment",segment)
+    # out_segment.write(segment)  # save segment result
   
     hough = cv2.HoughLinesP(segment, 2, np.pi / 180, 100, np.array([]), minLineLength = 100, maxLineGap = 50)
     
@@ -99,13 +115,20 @@ while (cap.isOpened()):
     # Visualizes the lines
     lines_visualize = visualize_lines(frame, lines)
     cv2.imshow("hough", lines_visualize)
+    # out_hough.write(lines_visualize)  # save hough result
     # Overlays lines on frame by taking their weighted sums and adding an arbitrary scalar value of 1 as the gamma argument
     output = cv2.addWeighted(frame, 0.9, lines_visualize, 1, 1)
     # Opens a new window and displays the output frame
     cv2.imshow("output", output)
+    # out_output.write(output)   #save final output
+
     # Frames are read by intervals of 10 milliseconds. The programs breaks out of the while loop when the user presses the 'q' key
     if cv2.waitKey(10) & 0xFF == ord('q'):
         break
 # The following frees up resources and closes all windows
 cap.release()
+'''out_canny.release()
+out_segment.release()
+out_hough.release()
+out_output.release()'''
 cv2.destroyAllWindows()
